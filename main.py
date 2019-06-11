@@ -113,8 +113,8 @@ def find_plugin(plugin_name):
             logger.debug("Found valid tag")
             anchor = row.find("a")
             name = anchor.text
-            logger.info(f"Checking plugin {name}")
-            logger.info(f"name: {plugin_name}")
+            logger.debug(f"Checking plugin {name}")
+            logger.debug(f"name: {plugin_name}")
             if plugin_match(name, plugin_name):
                 lower_name = name.lower().strip("/")
                 logger.info(f"Found: {lower_name}")

@@ -35,8 +35,6 @@ def test_scanner():
 
 
 
-
-
 def wash_plugin_list():
     washed_list = []
     plugin_list = plugins.split("\n")

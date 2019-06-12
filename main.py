@@ -2,7 +2,7 @@ import requests
 
 from bs4 import BeautifulSoup
 import logging
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, make_response
 
 app = Flask(__name__)
 
@@ -29,8 +29,7 @@ alt_value = "[DIR]"
 
 @app.route("/", methods = ["GET", "POST"])
 def extract_plugin_info():
-
-    data = request.args.get('plugins')
+    data = request.args.get('plugin')
 
     logger.info(f"Plugin request param: {data}")
 
@@ -39,6 +38,8 @@ def extract_plugin_info():
     logger.info(f"Returned data: {info}")
 
     return jsonify({"plugin": info})
+    #logger.error("Empty input!")
+    #return Response(jsonify({"message": "not found!"}), status=404)
 
 
 @app.route("/multi", methods = ["GET", "POST"])
@@ -60,8 +61,7 @@ def extract_plugin_info_list():
         if current:
             response_data.append(current)
 
-    return jsonify({"data": response_data, "comment" : "data found for requets plugins", "purpose": 42})
-
+    return jsonify({"plugins": response_data, "comment" : "data found for requets plugins", "purpose": 42})
 
 
 def find_version(url):
@@ -129,6 +129,7 @@ def find_plugin(plugin_name):
     logger.error(f"Did not find {plugin_name}")
     return None
 
+
 def plugin_match(path, name):
     path_stripped = path.lower().strip("/")
     logger.info(f"Checking if {name} == {path_stripped} excluding")
@@ -136,13 +137,6 @@ def plugin_match(path, name):
         logger.info("Found match!")
         return True
     return False
-
-
-#plugin = find_plugin(plugin_name)
-#
-# logger.info(f"{plugin}")
-#
-# logger.info("done")
 
 
 

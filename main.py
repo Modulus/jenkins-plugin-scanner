@@ -26,6 +26,8 @@ tag_value = "/icons/folder.gif"
 
 alt_value = "[DIR]"
 
+plugin_cache = []
+
 
 @app.route("/", methods = ["GET", "POST"])
 def extract_plugin_info():
@@ -37,7 +39,7 @@ def extract_plugin_info():
 
     logger.info(f"Returned data: {info}")
 
-    return jsonify({"plugin": info})
+    return jsonify({"plugin": info, "total": len(plugin_cache), "found": 1})
     #logger.error("Empty input!")
     #return Response(jsonify({"message": "not found!"}), status=404)
 
@@ -61,7 +63,7 @@ def extract_plugin_info_list():
         if current:
             response_data.append(current)
 
-    return jsonify({"plugins": response_data, "comment" : "data found for requets plugins", "purpose": 42})
+    return jsonify({"plugins": response_data, "comment" : "data found for requets plugins", "purpose": 42, "total" : len(plugin_cache), "found": len(response_data), "looked_for": len(request_json["plugins"])})
 
 
 def find_version(url):
@@ -92,6 +94,38 @@ def find_plugin(plugin_name):
         plugin_name = plugin_name[0:plugin_name.index(":")]
         logger.info(f"Stripped name: {plugin_name}")
 
+    if len(plugin_cache) > 0:
+        return find_plugin_in_cache(plugin_name)
+    else:
+        logger.info("Preparing plugin cache")
+        fill_cache()
+
+        logger.info(f"{len(plugin_cache)} plugins cached")
+        return find_plugin_in_cache(plugin_name)
+
+def find_plugin_in_cache(plugin_name):
+    for name in plugin_cache:
+        if plugin_match(name, plugin_name):
+            lower_name = name.lower().strip("/")
+            logger.info(f"Found: {lower_name}")
+            full_url = jenkins_plugin_url + name
+            logger.info(f"Opening plugin page at: {full_url}")
+            version_string = find_version(full_url)
+            plugin_formatted = f"{lower_name}:{version_string}"
+            logger.info(f"Returning plugin formatted as: {plugin_formatted}")
+            return plugin_formatted
+    return None
+
+def plugin_match(path, name):
+    path_stripped = path.lower().strip("/")
+    logger.info(f"Checking if {name} == {path_stripped} excluding")
+    if name and str(name) == path_stripped:
+        logger.info("Found match!")
+        return True
+    return False
+
+
+def fill_cache():
     logging.info(f"Looking for plugins @ {jenkins_plugin_url}")
 
     html = requests.get(f"{jenkins_plugin_url}")
@@ -115,28 +149,13 @@ def find_plugin(plugin_name):
             name = anchor.text
             logger.debug(f"Checking plugin {name}")
             logger.debug(f"name: {plugin_name}")
-            if plugin_match(name, plugin_name):
-                lower_name = name.lower().strip("/")
-                logger.info(f"Found: {lower_name}")
-                full_url = jenkins_plugin_url + name
-                logger.info(f"Opening plugin page at: {full_url}")
-                version_string = find_version(full_url)
-                plugin_formatted = f"{lower_name}:{version_string}"
-                logger.info(f"Returning plugin formatted as: {plugin_formatted}")
-                return plugin_formatted
+            plugin_cache.append(anchor.text)
         else:
             logger.debug("failed to find alt tag. Skipping")
     logger.error(f"Did not find {plugin_name}")
     return None
 
 
-def plugin_match(path, name):
-    path_stripped = path.lower().strip("/")
-    logger.info(f"Checking if {name} == {path_stripped} excluding")
-    if name and str(name) == path_stripped:
-        logger.info("Found match!")
-        return True
-    return False
 
 
 

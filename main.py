@@ -128,7 +128,7 @@ def plugin_match(path, name):
 def fill_cache():
     logging.info(f"Looking for plugins @ {jenkins_plugin_url}")
 
-    html = requests.get(f"{jenkins_plugin_url}")
+    html = requests.get(f"{jenkins_plugin_url}", timeout=300)
 
     soup = BeautifulSoup(html.content, 'html.parser')
 

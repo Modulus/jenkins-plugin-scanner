@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jenkins-plugin-scanner
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        editor: vscode
+        app: jenkins-plugin-scanner
+    spec:
+      containers:
+      - name: jenkins-plugin-scanner
+        image: coderpews/jenkins-plugin-scanner:release-1.0 
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1024Mi"
+          requests:
+            cpu: "256m"
+            memory: "512Mi"

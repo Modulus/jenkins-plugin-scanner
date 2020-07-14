@@ -7,6 +7,6 @@ RUN pip install -r requirements.txt
 
 
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:5000", "main:app"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:5000", "-t", "60", "main:app"]
 
 EXPOSE 5000

@@ -1,10 +1,15 @@
+import json
+
 import requests
 
 from bs4 import BeautifulSoup
 import logging
 from flask import Flask, request, jsonify, Response, make_response
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 
 
@@ -48,8 +53,12 @@ def extract_plugin_info():
 def extract_plugin_info_list():
 
     logger.info("Extracting json")
-
+    logger.info(f"Request is {dir(request)}")
     request_json = request.json
+    if request_json is None:
+        logger.warning("request.json returns None, looking up request.data instead")
+        # Decode byte array and load into python dictionary
+        request_json = json.loads(request.data.decode("utf-8"))
 
     logger.info(f"Got request json: {request_json}")
 
@@ -62,8 +71,9 @@ def extract_plugin_info_list():
         logger.info(f"Found data: {current}")
         if current:
             response_data.append(current)
-
-    return jsonify({"plugins": response_data, "comment" : "data found for requets plugins", "purpose": 42, "total" : len(plugin_cache), "found": len(response_data), "looked_for": len(request_json["plugins"])})
+    resp = jsonify({"plugins": response_data, "comment" : "data found for requets plugins", "purpose": 42, "total" : len(plugin_cache), "found": len(response_data), "looked_for": len(request_json["plugins"])})
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 
 def find_version(url):

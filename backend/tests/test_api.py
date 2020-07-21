@@ -8,6 +8,7 @@ from main import app
 
 
 
+
 def test_single_plugin_valid():
     response = app.test_client().post("/?plugin=kubernetes", content_type="application/json")
 

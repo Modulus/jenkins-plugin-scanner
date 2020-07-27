@@ -56,6 +56,7 @@ kind: Service
 metadata:
   name: scanner
 spec:
+  type: ClusterIP
   selector:
     app: scanner
   ports:
@@ -67,8 +68,38 @@ kind: Service
 metadata:
   name: front
 spec:
+  type: ClusterIP
   selector:
     app: front
   ports:
   - port: 80
     targetPort: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews-route
+spec:
+  hosts:
+  - 34.76.55.153
+  - scanner.demo.svc.cluster.local
+  - front.demo.svc.cluster.local
+  http:
+  - name: "api"
+    match:
+    - uri:
+        prefix: "/api/"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: scanner
+  - name: "frontend"
+    match:
+    - uri:
+        prefix: "/"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: front

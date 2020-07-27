@@ -94,7 +94,7 @@ export default {
             value = value.replace("-", "")
           }
           value = value.trim()
-          console.debug("Altered value: ", value)
+          console.log("Altered value: ", value)
           return value
         })
         console.log(this.input.plugins)

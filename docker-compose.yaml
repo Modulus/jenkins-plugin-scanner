@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  scanner:
+    build: ./backend
+    ports:
+      - "5000:5000"
+  front:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      args: 
+        MODE: development
+    ports:
+      - "8080:80"

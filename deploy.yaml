@@ -49,7 +49,7 @@ spec:
             memory: "128Mi"
             cpu: "500m"
         ports:
-        - containerPort: 80
+        - containerPort: 5000
 ---
 apiVersion: v1
 kind: Service
@@ -61,7 +61,7 @@ spec:
     app: scanner
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 5000
 ---
 apiVersion: v1
 kind: Service
@@ -75,31 +75,47 @@ spec:
   - port: 80
     targetPort: 80
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: main-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+
+---
+apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: reviews-route
 spec:
   hosts:
-  - 34.76.55.153
-  - scanner.demo.svc.cluster.local
-  - front.demo.svc.cluster.local
+    - "*"
+  gateways:
+    -  main-gateway
   http:
-  - name: "api"
-    match:
-    - uri:
-        prefix: "/api/"
-    rewrite:
-      uri: "/"
-    route:
-    - destination:
-        host: scanner
-  - name: "frontend"
-    match:
-    - uri:
-        prefix: "/"
-    rewrite:
-      uri: "/"
-    route:
-    - destination:
-        host: front
+    - name: "api"
+      match:
+      - uri:
+          prefix: "/api/multi/"
+      rewrite:
+        uri: "/multi"
+      route:
+      - destination:
+          host: scanner
+    - name: "frontend"
+      match:
+      - uri:
+          prefix: "/"
+      rewrite:
+        uri: "/"
+      route:
+      - destination:
+          host: front

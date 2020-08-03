@@ -5,7 +5,7 @@
           <div class="ui form">
             <div class="field">
               <label>Plugins</label>
-              <textarea id="inputPlugins" class="largeText" v-model="input.pluginsText"></textarea>
+              <textarea rows="35" v-model="input.pluginsText"></textarea>
             </div>
   
           </div>
@@ -14,7 +14,7 @@
         <div class="ui form">
           <div class="field">
             <label>Newest plugins</label>
-            <textarea disabled v-model="output.pluginsText"></textarea>
+            <textarea rows="35" disabled v-model="output.pluginsText"></textarea>
           </div>
       </div>
     </div>
@@ -30,7 +30,7 @@
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'PluginScanner',
   props: {
     msg: String
   },
@@ -105,7 +105,7 @@ export default {
     },
     fetchPlugins(){
       if(this.input.pluginsText){
-        let url = process.env.VUE_APP_SERVICE_URL
+        let url = "http://" + window.location.host +  process.env.VUE_APP_SERVICE_URL
         if(!url){
           url = "http://localhost:5000/multi"
         }
@@ -153,12 +153,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.largeText {
+/* .largeText {
   height: 800em;
   min-height: 50%;
   min-width: 50%;
   display: inline-block;
-}
+} */
 .outline {
   border:  1px black;
 }

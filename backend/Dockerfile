@@ -3,7 +3,7 @@ FROM python:alpine3.9
 WORKDIR /opt/app
 
 COPY . /opt/app
-COPY requirements.txt .
+COPY requirements.txt /opt/app
 
 RUN pip install -r requirements.txt
 

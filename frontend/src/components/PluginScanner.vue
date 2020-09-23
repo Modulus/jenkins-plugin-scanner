@@ -152,6 +152,10 @@ export default {
             }
           });
           this.unlockUi()
+          if (result.plugins.length <= 0 ){
+            this.errorMessage = "Did not find any matching plugins!"
+            this.showErrorBox()
+          }
         })
         .catch(error => {
           this.unlockUi()

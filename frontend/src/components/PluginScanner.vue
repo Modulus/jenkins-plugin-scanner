@@ -105,7 +105,7 @@ export default {
     },
     fetchPlugins(){
       if(this.input.pluginsText){
-        let url = "http://" + window.location.host +  process.env.VUE_APP_SERVICE_URL
+        let url = window.location.protocol + "//" + window.location.host +  process.env.VUE_APP_SERVICE_URL
         if(!url){
           url = "http://localhost:5000/multi"
         }

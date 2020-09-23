@@ -1,10 +1,14 @@
-# Build  backend
-cd backend
-docker build  -t  coderpews/jenkins-plugins-scanner-backend  .
-
 # Build  frontend
 cd frontend
-docker build  -t  coderpews/jenkins-plugins-scanner-frontend  .
+npm run build
+
+# Build  backend
+cp -r dist ../backend
+cd ../backend
+docker build  -t  coderpews/jenkins-plugins-scanner  .
+
+# Note after update
+The frontend is copied and hosted from the backend at this moment.
 
 ## local cluster
 kind create cluster

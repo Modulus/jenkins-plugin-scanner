@@ -5,7 +5,7 @@
           <div class="ui form">
             <div class="field">
               <label>Plugins</label>
-              <textarea rows="35" v-model="input.pluginsText"></textarea>
+              <textarea id="inputPlugins" rows="35" v-model="input.pluginsText"></textarea>
             </div>
   
           </div>

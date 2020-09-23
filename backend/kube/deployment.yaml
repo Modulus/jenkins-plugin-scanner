@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: jenkins-plugin-scanner
-        image: coderpews/jenkins-plugin-scanner:release-1.0 
+        image: coderpews/jenkins-plugin-scanner:1.0 
         resources:
           limits:
             cpu: "1000m"

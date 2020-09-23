@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify, Response, make_response
 
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="", static_folder="dist")
 CORS(app)
 
 
@@ -33,8 +33,12 @@ alt_value = "[DIR]"
 
 plugin_cache = []
 
+@app.route("/", methods= ["GET"], strict_slashes=False)
+def index():
+    return app.send_static_file("index.html")
 
-@app.route("/", methods = ["GET", "POST"])
+
+@app.route("/api/single", methods = ["GET", "POST"], strict_slashes=False)
 def extract_plugin_info():
     data = request.args.get('plugin')
 
@@ -49,7 +53,7 @@ def extract_plugin_info():
     #return Response(jsonify({"message": "not found!"}), status=404)
 
 
-@app.route("/multi", methods = ["GET", "POST"])
+@app.route("/api/multi", methods = ["GET", "POST"], strict_slashes=False)
 def extract_plugin_info_list():
 
     logger.info("Extracting json")

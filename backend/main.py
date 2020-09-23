@@ -7,6 +7,7 @@ import logging
 from flask import Flask, request, jsonify, Response, make_response
 
 from flask_cors import CORS
+import time
 
 app = Flask(__name__, static_url_path="", static_folder="dist")
 CORS(app)
@@ -31,7 +32,9 @@ tag_value = "/icons/folder.gif"
 
 alt_value = "[DIR]"
 
+
 plugin_cache = []
+cache_age = 0
 
 @app.route("/", methods= ["GET"], strict_slashes=False)
 def index():
@@ -42,29 +45,27 @@ def index():
 def extract_plugin_info():
     data = request.args.get('plugin')
 
-    logger.info(f"Plugin request param: {data}")
+    logger.debug(f"Plugin request param: {data}")
 
     info = find_plugin(data)
 
-    logger.info(f"Returned data: {info}")
+    logger.debug(f"Returned data: {info}")
 
     return jsonify({"plugin": info, "total": len(plugin_cache), "found": 1})
-    #logger.error("Empty input!")
-    #return Response(jsonify({"message": "not found!"}), status=404)
 
 
 @app.route("/api/multi", methods = ["GET", "POST"], strict_slashes=False)
 def extract_plugin_info_list():
 
-    logger.info("Extracting json")
-    logger.info(f"Request is {dir(request)}")
+    logger.debug("Extracting json")
+    logger.debug(f"Request is {dir(request)}")
     request_json = request.json
     if request_json is None:
         logger.warning("request.json returns None, looking up request.data instead")
         # Decode byte array and load into python dictionary
         request_json = json.loads(request.data.decode("utf-8"))
 
-    logger.info(f"Got request json: {request_json}")
+    logger.debug(f"Got request json: {request_json}")
 
     response_data = []
 
@@ -102,18 +103,33 @@ def find_version(url):
 
 
 def find_plugin(plugin_name):
+    current_time = time.time()
+
+    logger.info("Current time: {}".format(current_time))
+
+    global cache_age
+
+    logger.info("Cache age: {}".format(cache_age))
+
+
+    age_of_cache = current_time - cache_age
+
+    logger.info("Cache age is {}".format(age_of_cache))
+    logger.info("Cache length is: {}".format(len(plugin_cache)))
 
     if ":" in plugin_name:
-        logger.info(f"Stripping : from {plugin_name}")
+        logger.debug(f"Stripping : from {plugin_name}")
         plugin_name = plugin_name[0:plugin_name.index(":")]
-        logger.info(f"Stripped name: {plugin_name}")
+        logger.debug(f"Stripped name: {plugin_name}")
 
-    if len(plugin_cache) > 0:
+    if len(plugin_cache) > 0 and age_of_cache < 3600:
+        logger.info("Cache is younger than 1 hour, fetching from cache")
         return find_plugin_in_cache(plugin_name)
     else:
+        logger.info("Cache is older than 1  hour, fetching new cache")
         logger.info("Preparing plugin cache")
         fill_cache()
-
+        cache_age = time.time()
         logger.info(f"{len(plugin_cache)} plugins cached")
         return find_plugin_in_cache(plugin_name)
 
@@ -121,20 +137,20 @@ def find_plugin_in_cache(plugin_name):
     for name in plugin_cache:
         if plugin_match(name, plugin_name):
             lower_name = name.lower().strip("/")
-            logger.info(f"Found: {lower_name}")
+            logger.debug(f"Found: {lower_name}")
             full_url = jenkins_plugin_url + name
-            logger.info(f"Opening plugin page at: {full_url}")
+            logger.debug(f"Opening plugin page at: {full_url}")
             version_string = find_version(full_url)
             plugin_formatted = f"{lower_name}:{version_string}"
-            logger.info(f"Returning plugin formatted as: {plugin_formatted}")
+            logger.debug(f"Returning plugin formatted as: {plugin_formatted}")
             return plugin_formatted
     return None
 
 def plugin_match(path, name):
     path_stripped = path.lower().strip("/")
-    logger.info(f"Checking if {name} == {path_stripped} excluding")
+    logger.debug(f"Checking if {name} == {path_stripped} excluding")
     if name and str(name) == path_stripped:
-        logger.info("Found match!")
+        logger.debug("Found match!")
         return True
     return False
 
@@ -147,6 +163,12 @@ def fill_cache():
     soup = BeautifulSoup(html.content, 'html.parser')
 
     logger.info("Looking for table rows")
+
+    logger.info("Resetting cache array")
+
+    global plugin_cache
+
+    plugin_cache = []
 
     rows = soup.find_all("tr")
 
@@ -170,6 +192,6 @@ def fill_cache():
     return None
 
 
-
-
-
+def get_plugin_cache_length():
+    global plugin_cache
+    return len(plugin_cache)

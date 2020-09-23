@@ -1,4 +1,5 @@
 from main import find_plugin
+from main import plugin_cache, get_plugin_cache_length
 
 plugins = """
 - kubernetes:1.15.5
@@ -19,6 +20,7 @@ plugins = """
 
 
 def test_scanner():
+
     data = wash_plugin_list()
     print(f"Found: {data}")
 
@@ -31,6 +33,33 @@ def test_scanner():
     assert len(found_plugins) > 0
     assert len(data) > 0
     assert len(found_plugins) == len(data)
+
+
+def test_plugin_cache():
+
+
+
+    data = wash_plugin_list()
+
+    found_plugins = []
+    for plugin in data:
+        current_plugin = find_plugin(plugin)
+        found_plugins.append(current_plugin)
+
+    print(f"{found_plugins}")
+    
+    assert get_plugin_cache_length() > 0
+
+    # Test cache size is same as last call
+    last_cache_size = get_plugin_cache_length()
+    found_plugins = []
+    for plugin in data:
+        current_plugin = find_plugin(plugin)
+        found_plugins.append(current_plugin)
+
+
+    assert get_plugin_cache_length() == last_cache_size
+
 
 
 

@@ -1,5 +1,9 @@
 <template>
     <div class="ui aligned center aligned grid">
+      <div id="errorBox" class="twelve wide column centered ui red message"
+        v-bind:class="{hidden: errorHidden}">
+         <span class="errorMessage">{{errorMessage}}</span>
+      </div>
  
       <div class="six wide column outline">
           <div class="ui form">
@@ -58,10 +62,18 @@ export default {
       output:  {
         plugins: [],
         pluginsText: ""
-      }
+      },
+      errorMessage: "",
+      errorHidden: true
     }
   },
   methods: {
+    showErrorBox(){
+      this.errorHidden = false
+    },
+    hideErrorBox(){
+        this.errorHidden = true
+    },
     lockUi(){
       document.getElementById("inputPlugins").disabled = true
       this.buttons.fetchClass.disabled = true
@@ -77,6 +89,7 @@ export default {
       this.buttons.clearClass.loading = false
     },
     clear(){
+      this.hideErrorBox()
       console.log("Clearing data")
       this.input.plugins = []
       this.input.pluginsText = ""
@@ -84,6 +97,7 @@ export default {
       this.output.pluginsText = ""
     },
     createList(){
+      this.hideErrorBox()
       console.log("Creating list from text area input data")
       console.log(this.input.pluginsText)
       if(this.input.pluginsText){
@@ -104,10 +118,11 @@ export default {
       }
     },
     fetchPlugins(){
+      this.hideErrorBox()
       if(this.input.pluginsText){
         let url = window.location.protocol + "//" + window.location.host +  process.env.VUE_APP_SERVICE_URL
-        if(!url){
-          url = "http://localhost:5000/multi"
+        if(!url || process.env.NODE_ENV && process.env.NODE_ENV == "development"){
+          url =  process.env.VUE_APP_SERVICE_URL
         }
        
         console.log("Fetching plugins from: ", url)
@@ -140,11 +155,16 @@ export default {
         })
         .catch(error => {
           this.unlockUi()
+          this.errorMessage = "Failed to fetch data: " + error
           console.error("Failed to fetch data: ", error)
+          this.showErrorBox()
         })
       }
       else{
-        console.error("Missing input!")
+        let message = "Missing input!"
+        console.error(message)
+        this.errorMessage = message
+        this.showErrorBox()
       }
     }
   }

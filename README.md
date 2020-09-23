@@ -32,3 +32,5 @@ kubectl apply -f ns.yaml
 kubectl apply -f  gateway.yaml
 kubectl apply -f deploy.yaml
 ```
+
+Triggerring commit hook!

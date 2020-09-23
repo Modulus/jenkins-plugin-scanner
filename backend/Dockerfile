@@ -1,6 +1,8 @@
 FROM python:alpine3.9
 
-COPY main.py .
+WORKDIR /opt/app
+
+COPY . /opt/app
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt

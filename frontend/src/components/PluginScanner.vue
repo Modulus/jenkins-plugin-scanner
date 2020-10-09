@@ -18,15 +18,24 @@
         <div class="ui form">
           <div class="field">
             <label>Newest plugins</label>
-            <textarea rows="35" disabled v-model="output.pluginsText"></textarea>
+            <textarea rows="35" v-model="output.pluginsText"></textarea>
+            <input type="hidden" id="pluginsText" :value="pluginsCopyText">
           </div>
       </div>
     </div>
     <div class="twelve wide column  outline">
-      <div class="ui buttons">
-        <button  v-bind:class="buttons.fetchClass"  v-on:click="fetchPlugins()">Fetch</button>
-        <div class="or"></div>
-        <button v-bind:class="buttons.clearClass" v-on:click="clear()">Clear</button>
+      <div class="ui">
+        <button  v-bind:class="buttons.fetchClass"  v-on:click="fetchPlugins()">
+            <i class="angle double down icon"></i>
+          Fetch
+        </button>
+        <button v-bind:class="buttons.clearClass" v-on:click="clear()">
+          <i class="trash icon"></i>
+          Clear</button>
+        <button v-bind:class="buttons.copyClass" v-on:click="copyClipBoard()">
+          <i class="copy icon"></i>
+          Copy
+        </button>
       </div>
     </div>
   </div>
@@ -41,18 +50,31 @@ export default {
   data(){
     return {
       buttons: {
+        copyClass: {
+            ui: true,
+            button: true,
+            orange: true,
+            disabled: false,
+            icon: true,
+            labeled: true,
+            loading: false
+        },
         fetchClass: {
             ui: true,
             button: true,
             positive: true,
             disabled: false,
+            icon: true,
+            labeled: true,            
             loading: false
         },
         clearClass: {
             ui: true,
             button: true,
             disabled: false,
-            loading:  false
+            loading:  false,
+            icon: true,
+            labeled: true,
         }
       },
       input: {
@@ -67,7 +89,28 @@ export default {
       errorHidden: true
     }
   },
+  computed: {
+    pluginsCopyText: function(){
+      return this.output.pluginsText.replace("-", "\n-")
+    }
+  },
   methods: {
+    copyClipBoard(){
+      let pluginsTextToCopy = document.querySelector("#pluginsText")
+      pluginsTextToCopy.setAttribute("type", "text")
+      pluginsTextToCopy.select()
+
+      try {
+        var successful = document.execCommand("copy")
+        var msg = successful ? "success" : "failed"
+        console.log(msg)
+      } catch(err){
+        this.errorMessage = err
+        this.showErrorBox()
+      }
+      pluginsTextToCopy.setAttribute("type", "hidden")
+      window.getSelection().removeAllRanges()
+    },
     showErrorBox(){
       this.errorHidden = false
     },
@@ -80,6 +123,8 @@ export default {
       this.buttons.clearClass.disabled = true
       this.buttons.fetchClass.loading = true
       this.buttons.clearClass.loading = true
+      this.buttons.copyClass.disabled = true
+      this.buttons.copyClass.loading = true
     },
     unlockUi(){
       document.getElementById("inputPlugins").disabled = false
@@ -87,6 +132,8 @@ export default {
       this.buttons.clearClass.disabled = false
       this.buttons.fetchClass.loading = false
       this.buttons.clearClass.loading = false
+      this.buttons.copyClass.loading = false
+      this.buttons.copyClass.disabled = false
     },
     clear(){
       this.hideErrorBox()
